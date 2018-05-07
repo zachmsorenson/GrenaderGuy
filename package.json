@@ -1,0 +1,8 @@
+{
+    "name": "GrenaderGuy",
+    "dependencies": {
+        "express": "latest",
+        "socket.io": "latest",
+        "phaser": "latest"
+    }
+}
