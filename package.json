@@ -3,6 +3,6 @@
     "dependencies": {
         "express": "latest",
         "socket.io": "latest",
-        "phaser": "latest"
+        "phaser": "2.6.2"
     }
 }
