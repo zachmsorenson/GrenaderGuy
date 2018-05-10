@@ -6,11 +6,22 @@
         <script src="/socket.io/socket.io.js"></script>
         <script type="text/javascript" src="js/phaser.min.js"></script>
     </head>
+    Enter Your Name:
+    <input type="text" id="name">
+    Pick Your Favorite Color:
+    <select id="color">
+        <option value="red">Red</option>
+        <option value="pink">Pink</option>
+        <option value="yellow">Yellow</option>
+        <option value="blue">Blue</option>
+        <option value="green">Green</option>
+    </select>
+
     <body>
         <div id="game"></div>
     </body>
 
-    <button onclick="sendStartGame()">Start Game</button>
+    <button onclick="sendStartGame()" style="display: none">Start Game</button>
 
     <!--<script data-main="js/main" src="js/require.js"></script>-->
     <script src="js/game.js"></script>
