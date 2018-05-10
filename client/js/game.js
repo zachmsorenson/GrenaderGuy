@@ -5,27 +5,19 @@ Game.init = function(){
 };
 
 Game.preload = function(){
+    // Load everything you will need to do
     game.load.tilemap('map', 'assets/map/secondTilemap.json', null, Phaser.Tilemap.TILED_JSON);
-    game.load.spritesheet('tileset', 'assets/map/simples_pimples.png', 32, 32);
+    game.load.spritesheet('tileset', 'assets/map/simples_pimples.png', 21, 21);
     game.load.image('sprite', 'assets/sprites/sprite.png');
 };
 
-var upKey;
-var downKey;
-var rightKey;
-var leftKey;
-
 Game.create = function(){
+    // Set up and start the game
     Game.playerMap = {};
 
     // add tilemap to game
     //enable arcade phyics
 	game.physics.startSystem(Phaser.Physics.ARCADE);
-
-	upKey = game.input.keyboard.addKey(Phaser.keyboard.UP);
-	downKey = game.input.keyboard.addKey(Phaser.keyboard.DOWN);
-	rightKey = game.input.keyboard.addKey(Phaser.keyboard.RIGHT);
-	leftKey = game.input.keyboard.addKey(Phaser.keyboard.LEFT);
 
     var map = game.add.tilemap('map');
     // add the tileset ontop of the tilemap
@@ -38,25 +30,24 @@ Game.create = function(){
 
     map.setCollisionBetween(1, 5000, true, blockedLayer);
     map.setCollisionBetween(1, 5000, true, objectLayer);
-    console.log(blockedLayer);
+    
     backgroundLayer.inputEnabled = true; // Allows clicking on map
-    Client.askNewPlayer();
 
     backgroundLayer.events.onInputUp.add(Game.getCoordinates, this);
-    layer.events.onInputUp.add(Game.getCoordinates, this);
 };
 
 Game.update = function () {
-
+    var player = this.playerMap[0];
 }
 
 Game.addNewPlayer = function(id, x, y){ // add a new player to the game map
      // the player in the player map id with
-    var sprite = Game.playerMap[id] = game.add.sprite(x, y, 'sprite'); 
-    game.physics.arcade.enable(sprite);
+    console.log(Game);
+    Game.playerMap[id] = game.add.sprite(x, y, 'sprite'); 
+    game.physics.arcade.enable(Game.playerMap[id]);
 
     //create new player
-    Game.playerMap[id] = game.add.sprite(x, y, 'sprite'); // the player in the player map id with
+   // Game.playerMap[id] = game.add.sprite(x, y, 'sprite'); // the player in the player map id with
     // passed id is added to the game with a sprite
 };
 
