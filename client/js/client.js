@@ -1,32 +1,50 @@
 var Client = {};
 Client.socket = io.connect();
+init();
 
+function init(){
+    setEventHandlers();
+}
+
+function setEventHandlers(){
+    socket = Client.socket;
+
+    socket.on('newplayer', newPlayer);
+    socket.on('allplayers', allPlayers);
+    socket.on('remove', remove);
+    socket.on('start game', startGame);
+    socket.on('move', move);
+};
 Client.askNewPlayer = function(){
     Client.socket.emit('newplayer');
 };
 
-Client.socket.on('newplayer', function(data) { // upon getting newplayer message from server, add that player to the Game object.
+function newPlayer(data){
     Game.addNewPlayer(data.id, data.x, data.y);
-});
+}
 
-Client.socket.on('allplayers', function(data){ //upon getting allplayers message, add all players to Game object
-    console.log(data);
+function allPlayers(data){
     for (var i = 0; i < data.length; i++){
         Game.addNewPlayer(data[i].id, data[i].x, data[i].y);
     }
-});
+}
 
-Client.socket.on('remove', function(id){
+function remove(id){
     Game.removePlayer(id);
-});
+}
+
+function move(data){
+    Game.movePlayer(data.id, data.x, data.y);
+}
 
 //Mouse-click movement
 Client.sendClick = function(x, y){
     Client.socket.emit('click', {x:x, y:y});
 };
-Client.socket.on('move', function(data) {
-	Game.movePlayer(data.id, data.x, data.y);
-});
+
+function sendStartGame(){
+    Client.socket.emit('start game');
+}
 
 
 ///////ADDED BY WILL FOR MOVEMENT///////////////
