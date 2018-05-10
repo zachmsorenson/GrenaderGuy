@@ -3,83 +3,85 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 
+var Game = require('./objects/game.js');
+var Player = require('./objects/player.js');
+
 port = 8019;
-
 app.use(express.static('client'));
-
-/*
-app.get('/', function(req, res){
-    res.sendFile(__dirname + '../client/index.html');
-});
-*/
-server.lastPlayerID = 0;
 
 server.listen(port, function(){
     console.log('Listening on ' + port);
 });
 
+var lastPlayerID = 0;
+var lastBombID = 0;
+
+var games = {};
 init();
 
 function init() {
+    // Listen for events
     setEventHandlers();
-
+    
+    // Game loop
+    setInterval(gameLoop, 200);
 };
 
 function setEventHandlers() {
     io.on('connection', function(client){
+        console.log('Player connection: ' + client.id);
+
         client.on('newplayer', onNewPlayer);
         client.on('click', click);
         client.on('disconnect', onDisconnect);
+
+        client.on('join room', Lobby.onJoinRoom);
     });
 };
 
 function onNewPlayer(){
     this.player = {
-        id: server.lastPlayerID++,
+        id: lastPlayerID++,
         x: randomInt(100,400),
-        y: randomInt(100,400)
+        y: randomInt(100,400),
+        alive: true,
+        hasMoved: false
     }
+    game.players[this.player.id] = this.player;
+    console.log(game);
+    console.log(game.players);
     this.emit('allplayers', getAllPlayers());
     this.broadcast.emit('newplayer', this.player);
 }
 
 function click(data){
-    console.log('click to ' + data.x + ',' + data.y);
-    this.player.x = data.x;
-    this.player.y = data.y;
-    io.emit('move', this.player);
+    if (this.player){
+        console.log('click to ' + data.x + ',' + data.y);
+        this.player.hasMoved = true;
+        this.player.x = data.x;
+        this.player.y = data.y;
+        //console.log(this.player);
+        //io.emit('move', this.player);
+    }
 }
 
 function onDisconnect(){
-    io.emit('remove', this.player.id);
+    if (this.player){
+        io.emit('remove', this.player.id);
+    }
 }
 
-/*
-io.on('connection', function(socket){
-    socket.on('newplayer', function(){ // Upon receiving a newplayer message, add the
-        // player's data to the socket as an object
-        socket.player = {
-            id: server.lastPlayerID++,
-            x: randomInt(100,400),
-            y: randomInt(100,400)
-        };
-        socket.emit('allplayers', getAllPlayers()); //send an allplayers message to the new connectee with 
-                                                    //data on each existing player for their client
-        socket.broadcast.emit('newplayer', socket.player); // send a newplayer message to each player with their data
+function onDropBomb(data){
+    if (this.player){
+        var player = this.player;
+        var bomb = new Bomb(player.x, player.y, lastBombID);
+        io.emit('drop bomb', bomb);
+    }
+}
 
-        socket.on('click', function(data){
-            console.log('click to ' + data.x + ',' + data.y);
-            socket.player.x = data.x;
-            socket.player.y = data.y;
-            io.emit('move', socket.player);
-        });
-
-        socket.on('disconnect', function(){
-            io.emit('remove', socket.player.id);
-        });
-    });
-});
-*/
+function onMovePlayer(data) {
+    var player = this.player;
+}
 
 function getAllPlayers(){
     var players = [];
@@ -95,3 +97,18 @@ function getAllPlayers(){
 function randomInt (low, high) {
     return Math.floor(Math.random() * (high - low) + low);
 }
+
+function gameLoop() {
+    // on each loop, check if a player has moved.
+    // if they have, emit that move
+    for(var game in games){
+        var game = games[game];
+        for(var i in game.players) {
+            var player = game.players[i]; // for each player
+            if(player.alive && player.hasMoved) {
+                io.emit('move', player);
+                player.hasMoved = false;
+            }
+        }
+    }
+}    
