@@ -5,6 +5,7 @@ var io = require('socket.io').listen(server);
 
 var Game = require('./objects/game.js');
 var Player = require('./objects/player.js');
+//var Lobby = require('./objects/lobby.js');
 
 port = 8019;
 app.use(express.static('client'));
@@ -16,7 +17,7 @@ server.listen(port, function(){
 var lastPlayerID = 0;
 var lastBombID = 0;
 
-var games = {};
+var game = new Game();
 init();
 
 function init() {
@@ -35,7 +36,7 @@ function setEventHandlers() {
         client.on('click', click);
         client.on('disconnect', onDisconnect);
 
-        client.on('join room', Lobby.onJoinRoom);
+  //      client.on('join room', Lobby.onJoinRoom);
     });
 };
 
@@ -101,8 +102,8 @@ function randomInt (low, high) {
 function gameLoop() {
     // on each loop, check if a player has moved.
     // if they have, emit that move
-    for(var game in games){
-        var game = games[game];
+//    for(var game in games){
+//        var game = games[game];
         for(var i in game.players) {
             var player = game.players[i]; // for each player
             if(player.alive && player.hasMoved) {
@@ -110,5 +111,5 @@ function gameLoop() {
                 player.hasMoved = false;
             }
         }
-    }
+//    }
 }    
