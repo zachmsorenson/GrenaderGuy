@@ -5,22 +5,56 @@ var io = require('socket.io').listen(server);
 
 port = 8019;
 
-app.use('/js', express.static(__dirname + '/public/js'));
-app.use('/css', express.static(__dirname + '/public/css'));
-app.use('/assets', express.static(__dirname + '/public/assets'));
+app.use(express.static('client'));
 
+/*
 app.get('/', function(req, res){
-    res.sendFile(__dirname + '/public/index.html');
+    res.sendFile(__dirname + '../client/index.html');
 });
-
+*/
 server.lastPlayerID = 0;
 
 server.listen(port, function(){
     console.log('Listening on ' + port);
 });
 
+init();
 
+function init() {
+    setEventHandlers();
 
+};
+
+function setEventHandlers() {
+    io.on('connection', function(client){
+        client.on('newplayer', onNewPlayer);
+        client.on('click', click);
+        client.on('disconnect', onDisconnect);
+    });
+};
+
+function onNewPlayer(){
+    this.player = {
+        id: server.lastPlayerID++,
+        x: randomInt(100,400),
+        y: randomInt(100,400)
+    }
+    this.emit('allplayers', getAllPlayers());
+    this.broadcast.emit('newplayer', this.player);
+}
+
+function click(data){
+    console.log('click to ' + data.x + ',' + data.y);
+    this.player.x = data.x;
+    this.player.y = data.y;
+    io.emit('move', this.player);
+}
+
+function onDisconnect(){
+    io.emit('remove', this.player.id);
+}
+
+/*
 io.on('connection', function(socket){
     socket.on('newplayer', function(){ // Upon receiving a newplayer message, add the
         // player's data to the socket as an object
@@ -45,6 +79,7 @@ io.on('connection', function(socket){
         });
     });
 });
+*/
 
 function getAllPlayers(){
     var players = [];
