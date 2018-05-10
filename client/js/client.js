@@ -20,10 +20,30 @@ Client.socket.on('remove', function(id){
     Game.removePlayer(id);
 });
 
+//Mouse-click movement
 Client.sendClick = function(x, y){
     Client.socket.emit('click', {x:x, y:y});
 };
-
 Client.socket.on('move', function(data) {
+	Game.movePlayer(data.id, data.x, data.y);
+});
+
+
+///////ADDED BY WILL FOR MOVEMENT///////////////
+Client.sendRight = function (x, y) {
+    Client.socket.emit('right', {x:x, y:y});
+};
+Client.sendLeft = function (x, y) {
+	Client.socket.emit('left', {x:x, y:y});
+};
+Client.sendUp = function (x, y) {
+	Client.socket.emit('up', {x:x, y:y});
+};
+Client.sendDown = function (x, y) {
+	Client.socket.emit('down', {x:x, y:y});
+};
+
+Client.socket.on('move_direction', function (data) {
     Game.movePlayer(data.id, data.x, data.y);
 });
+///////END: ADDED BY WILL FOR MOVEMENT///////////////

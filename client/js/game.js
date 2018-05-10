@@ -10,8 +10,22 @@ Game.preload = function(){
     game.load.image('sprite', 'assets/sprites/sprite.png');
 };
 
+var upKey;
+var downKey;
+var rightKey;
+var leftKey;
+
 Game.create = function(){
     Game.playerMap = {};
+
+    //enable arcade phyics
+	game.physics.startSystem(Phaser.Physics.ARCADE);
+
+	upKey = game.input.keyboard.addKey(Phaser.keyboard.UP);
+	downKey = game.input.keyboard.addKey(Phaser.keyboard.DOWN);
+	rightKey = game.input.keyboard.addKey(Phaser.keyboard.RIGHT);
+	leftKey = game.input.keyboard.addKey(Phaser.keyboard.LEFT);
+
     var map = game.add.tilemap('map');
     map.addTilesetImage('tilesheet', 'tileset'); // tilesheet is the key of the tileset in map's JSON file
     var layer;
@@ -20,11 +34,17 @@ Game.create = function(){
     }
     layer.inputEnabled = true; // Allows clicking on map
     Client.askNewPlayer();
-
     layer.events.onInputUp.add(Game.getCoordinates, this);
+
 };
 
+Game.update = function () {
+
+}
+
 Game.addNewPlayer = function(id, x, y){ // add a new player to the game map
+
+    //create new player
     Game.playerMap[id] = game.add.sprite(x, y, 'sprite'); // the player in the player map id with
     // passed id is added to the game with a sprite
 };
@@ -35,6 +55,7 @@ Game.removePlayer = function(id){
 };
 
 Game.getCoordinates = function(layer, pointer){
+    console.log("Got an input from client");
     Client.sendClick(pointer.worldX, pointer.worldY);
 };
 
@@ -46,3 +67,4 @@ Game.movePlayer = function(id, x, y){
     tween.to({x:x, y:y}, duration);
     tween.start();
 };
+

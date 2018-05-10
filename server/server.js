@@ -36,8 +36,22 @@ function setEventHandlers() {
         client.on('disconnect', onDisconnect);
 
         client.on('join room', Lobby.onJoinRoom);
+        client.on('right', moveRight);
+        client.on('left', moveLeft);
+        client.on('down', moveDown);
+        client.on('up', moveUp);
+
     });
 };
+function onNewPlayer() {
+	this.player = {
+		id: server.lastPlayerID++,
+		x: randomInt(100, 400),
+		y: randomInt(100, 400)
+	}
+	this.emit('allplayers', getAllPlayers());
+	this.broadcast.emit('newplayer', this.player);
+}
 
 function onNewPlayer(){
     this.player = {
@@ -52,6 +66,22 @@ function onNewPlayer(){
     console.log(game.players);
     this.emit('allplayers', getAllPlayers());
     this.broadcast.emit('newplayer', this.player);
+function moveRight (data) {
+    this.player.x = data.x + 20;
+    io.emit('move_direction', this.player);
+
+}
+function moveLeft (data) {
+	this.player.x = data.x - 20;
+	io.emit('move_direction', this.player);
+}
+function moveDown (data) {
+	this.player.y = data.y - 20;
+	io.emit('move_direction', this.player);
+}
+function moveUp (data) {
+	this.player.y = data.y + 20;
+	io.emit('move_direction', this.player);
 }
 
 function click(data){
