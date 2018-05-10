@@ -19,9 +19,8 @@ server.listen(port, function(){
     console.log('Listening on ' + port);
 });
 
-
-
 io.on('connection', function(socket){
+
     socket.on('newplayer', function(){ // Upon receiving a newplayer message, add the
         // player's data to the socket as an object
         socket.player = {
