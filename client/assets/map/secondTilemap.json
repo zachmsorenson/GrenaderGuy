@@ -2022,7 +2022,7 @@
         {
          "columns":50,
          "firstgid":1,
-         "image":"..\/Downloads\/simples_pimples.png",
+         "image":"./simples_pimples.png",
          "imageheight":1280,
          "imagewidth":800,
          "margin":0,
