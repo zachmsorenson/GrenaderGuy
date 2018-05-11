@@ -217,14 +217,13 @@ Game.placeBomb = function(x, y, id){
 
 Game.explode = function(bomb){
     console.log('explode function');
-    console.log(bomb);
     console.log(this.bombs);
     this.bombs.forEach((bombChild)=> {
         if (bombChild.id == bomb.id && bombChild){
+            console.log(bombChild);
             this.bombs.remove(bombChild);
         }
     });
     //var childBomb = this.bombs.getChildAt(bomb.id);
     //this.bombs.remove(childBomb);
-    console.log(this.bombs);
 }
