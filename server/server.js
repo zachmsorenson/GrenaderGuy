@@ -28,7 +28,7 @@ function init() {
     setEventHandlers();
 
     // Game loop
-    setInterval(gameLoop, 80);
+    setInterval(gameLoop, 50);
 }
 
 function setEventHandlers() {

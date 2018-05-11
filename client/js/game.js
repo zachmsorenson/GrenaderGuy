@@ -126,6 +126,7 @@ Game.createItems = function(){
 
 Game.update = function () {
     
+    if (this.player){
     if (this.player.alive){
 
     console.log(' what is player ');
@@ -181,6 +182,7 @@ Game.update = function () {
         }, 2000);
     }
 
+    }
     }
 }
 
@@ -288,7 +290,7 @@ Game.explode = function(bomb){
 		this.fire.remove(leftFire3);
 		this.fire.remove(upFire3);
 		this.fire.remove(downFire3);
-	    }, 1000);
+	    }, 700);
         }
     });
     //var childBomb = this.bombs.getChildAt(bomb.id);
