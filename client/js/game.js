@@ -63,7 +63,7 @@ Game.create = function(){
         if (player.id == Game.myID){
             console.log('make my player');
             console.log(player);
-            Game.addNewPlayer(player.id, player.x, player.y, player.color); 
+            Game.addNewPlayer(player.id, player.x, player.y, player.color);
         } else {
             console.log('make other player');
             console.log(player);
@@ -76,6 +76,7 @@ Game.create = function(){
     //this.craters = game.add.group();
     game.physics.enable(this.bombs, Phaser.Physics.ARCADE);
     this.bombs.enableBody = true;
+    //this.bombs.physicsType.immovable = true;
 
     this.fire = game.add.group();
     game.physics.enable(this.fire, Phaser.Physics.ARCADE);
@@ -119,6 +120,8 @@ Game.createItems = function(){
 	result.forEach(function(element){
 		Game.createFromTiledObject(element, items);
 	}, Game);
+	items.setAll('body.immovable', true);
+    	items.setAll('body.moves', false);
 }
 
 Game.update = function () {
@@ -127,6 +130,8 @@ Game.update = function () {
     game.physics.arcade.collide(this.player, this.layer);
     game.physics.arcade.collide(this.player, items);
     game.physics.arcade.collide(this.player, Game.bombs);
+    game.physics.arcade.overlap(this.fire, items, this.destroyItem, null, this);
+    game.physics.arcade.overlap(this.player, this.fire, this.destroyPlayer, null, this);
     //Moving Input
     if (this.leftKey.isDown){
         this.player.body.velocity.x = -100;
@@ -196,6 +201,14 @@ Game.removePlayer = function(id){
     delete Game.playerMap[id];
 };
 
+Game.destroyPlayer = function(player, fire){
+    Client.destroyPlayer(player.id);
+}
+
+Game.destroyItem = function(fire, item){
+    items.remove(item);
+}
+
 Game.movePlayer = function(id, x, y){
     var player = Game.playerMap[id];
 //    player.x = x;
@@ -213,6 +226,9 @@ Game.placeBomb = function(x, y, id){
     var normalizedY = y + 6 - ((y+6) % 16);
     var newBomb = this.bombs.create(normalizedX, normalizedY, 'bomb');
     newBomb.id = id;
+    this.bombs.setAll('body.immovable', true);
+    this.bombs.setAll('body.moves', false);
+
     console.log('created new bomb - id should be ' + id);
     //console.log(this.bombs.getChildAt(id));
     //this.bombs[id] = game.add.sprite(x, y, sprite);
@@ -227,15 +243,21 @@ Game.explode = function(bomb){
         if (bombChild.id == bomb.id && bombChild){
 	    var bombx = bombChild.world.x;
 	    var bomby = bombChild.world.y;
-	    var newFire = this.fire.create(bombx+16, bomby, 'bfire-right');
+	    var rightFire = this.fire.create(bombx+16, bomby, 'bfire-right');
             //newFire.id = id;
-	    var newFire = this.fire.create(bombx-16, bomby, 'bfire-left');
+	    var leftFire = this.fire.create(bombx-16, bomby, 'bfire-left');
             //newFire.id = id;
-	    var newFire = this.fire.create(bombx, bomby+16, 'bfire-up');
+	    var upFire = this.fire.create(bombx, bomby+16, 'bfire-up');
             //newFire.id = id;
-	    var newFire = this.fire.create(bombx, bomby-16, 'bfire-down');
+	    var downFire = this.fire.create(bombx, bomby-16, 'bfire-down');
 
             this.bombs.remove(bombChild);
+	    setTimeout(() => {
+		this.fire.remove(rightFire);
+		this.fire.remove(leftFire);
+		this.fire.remove(upFire);
+		this.fire.remove(downFire);
+	    }, 1000);
         }
     });
     //var childBomb = this.bombs.getChildAt(bomb.id);

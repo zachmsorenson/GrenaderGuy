@@ -71,6 +71,11 @@ function onSubmitted(data){
     Game.myID = data.id;
 }
 
+Client.destroyPlayer = function(id){
+    Client.socket.emit('destroy player', {id: id});
+    console.log("SENT DESTROY PLAYER MESSAGE" + id);
+}
+
 function onPlaceBomb(data){
     Game.placeBomb(data.x, data.y, data.id);    
 }
