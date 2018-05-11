@@ -17,6 +17,8 @@ server.listen(port, function(){
 var lastPlayerID = 0;
 var lastBombID = 0;
 
+var users = [];
+
 var game = new Game();
 init();
 
@@ -37,11 +39,10 @@ function setEventHandlers() {
         client.on('disconnect', onDisconnect);
         client.on('start game', startGame);
         client.on('place bomb', onPlaceBomb);
+
+        client.on('submit player', submitPlayer);
   //      client.on('join room', Lobby.onJoinRoom);
-        client.on('right', moveRight);
-        client.on('left', moveLeft);
-        client.on('down', moveDown);
-        client.on('up', moveUp);
+        client.on('move', onMove);
     });
 }
 
@@ -50,6 +51,24 @@ function onNewPlayer() {
 	this.broadcast.emit('newplayer', this.player);
 }
 
+function onMove(data){
+    var direction = data;
+    console.log(data);
+    var player = this.player;
+    console.log(player);
+    if (direction === "UP"){
+        this.player.y = this.player.y - 16;
+    } else if (direction === "DOWN"){
+        this.player.y = this.player.y + 16;
+    } else if (direction === "LEFT"){
+        this.player.x = this.player.x - 16;
+    } else if (direction === "RIGHT"){
+        this.player.x = this.player.x + 16;
+    }
+    this.player.hasMoved = true;
+}
+
+/*
 function onNewPlayer(){
     this.player = {
         id: lastPlayerID++,
@@ -64,6 +83,7 @@ function onNewPlayer(){
     this.emit('allplayers', getAllPlayers());
     this.broadcast.emit('newplayer', this.player);
 }
+*/
 
 function moveRight (data) {
     this.player.x = data.x + 20;
@@ -74,27 +94,31 @@ function moveRight (data) {
 function startGame(){
     console.log('recieved start game message');
 
-    var i = 0;
     Object.keys(io.sockets.connected).forEach(function(socketID){
         var socket = io.sockets.connected[socketID];
-        if (lastPlayerID == 0 || lastPlayerID == 2){
-            var xSpawn = 1;
-        } else {
-            var xSpawn = 400;
-        }
+        console.log('does socket have user ' + socket.user);
 
-        if (lastPlayerID == 0 || lastPlayerID == 1){
-            var ySpawn = 1;
-        } else {
-            var ySpawn = 400;
-        }
+        if (socket.user){ // socket is a user - add to game
+            id = socket.user.id;
+            if (id == 0 || id == 2){
+                var xSpawn = 16;
+            } else {
+                var xSpawn = 304;
+            }
+
+            if (id == 0 || id == 1){
+                var ySpawn = 16;
+            } else {
+                var ySpawn = 304;
+            }
         
-        socket.player = {
-            id: lastPlayerID++,
-            x: xSpawn,
-            y: ySpawn,
-            alive: true,
-            hasMoved: false
+            socket.player = {
+                id: socket.user.id,
+                x: xSpawn,
+                y: ySpawn,
+                alive: true,
+                hasMoved: false
+            }
         }
     });
     io.sockets.emit('start game');
@@ -102,6 +126,22 @@ function startGame(){
         io.sockets.emit('allplayers', getAllPlayers());
     }, 500);
 }
+
+function submitPlayer(data){
+    var username = data.username;
+    var color = data.color;
+
+    if(users.filter(e => e.username === username).length == 0 && users.length < 4){
+        var user = { id: lastPlayerID++, username: username, color: color};
+        users.push(user);
+    }
+
+    this.user = user;
+
+    io.sockets.emit('users', users);
+}
+
+    
 
 function click(data){
     if (this.player){
@@ -157,7 +197,9 @@ function randomInt (low, high) {
 function gameLoop() {
     for(var i in game.players) {
         var player = game.players[i]; // for each player
+        console.log(player);
         if(player.alive && player.hasMoved) {
+            console.log("player moved sent");
             io.emit('move', player);
             player.hasMoved = false;
         }

@@ -14,10 +14,16 @@ function setEventHandlers(){
     socket.on('remove', remove);
     socket.on('start game', startGame);
     socket.on('move', move);
+    socket.on('users', onUsers);
 };
 Client.askNewPlayer = function(){
     Client.socket.emit('newplayer');
 };
+
+Client.sendMove = function(direction){
+    console.log("move" + direction);
+    Client.socket.emit('move', direction);
+}
 
 function newPlayer(data){
     Game.addNewPlayer(data.id, data.x, data.y);
@@ -27,6 +33,12 @@ function allPlayers(data){
     for (var i = 0; i < data.length; i++){
         Game.addNewPlayer(data[i].id, data[i].x, data[i].y);
     }
+}
+
+function onUsers(data){
+    console.log('got users message:');
+    console.log(data);
+    displayUsers(data);
 }
 
 function remove(id){
@@ -46,6 +58,9 @@ function sendStartGame(){
     Client.socket.emit('start game');
 }
 
+Client.submitPlayer = function(username, color){
+    Client.socket.emit('submit player', {username: username, color: color});
+}
 
 ///////ADDED BY WILL FOR MOVEMENT///////////////
 Client.sendRight = function (x, y) {

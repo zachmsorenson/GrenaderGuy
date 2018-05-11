@@ -78,7 +78,14 @@ Game.createItems = function(){
 }
 
 Game.update = function () {
-    var player = this.playerMap[0];
+    //var player = this.playerMap[0];
+    if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT)){
+        Client.sendMove("LEFT");
+    }
+    if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)){
+        Client.sendMove("RIGHT");
+    }
+
 }
 
 Game.addNewPlayer = function(id, x, y){ // add a new player to the game map
