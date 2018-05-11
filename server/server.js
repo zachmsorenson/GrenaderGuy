@@ -40,6 +40,7 @@ function setEventHandlers() {
         client.on('disconnect', onDisconnect);
         client.on('start game', startGame);
         client.on('place bomb', onPlaceBomb);
+        client.on('destroy player', onDestroyPlayer);
 
         client.on('submit player', submitPlayer);
   //      client.on('join room', Lobby.onJoinRoom);
@@ -123,6 +124,15 @@ function onDisconnect(){
         console.log('want to send a remove message');
         //io.emit('remove', this.player.id);
     }
+}
+
+function onDestroyPlayer(data){
+    
+    console.log('server destroy player message');
+    console.log(data);
+    var player = game.players[data.id];
+    player.alive = false;
+    io.emit('remove player', {id: data.id});
 }
 
 function onPlaceBomb(data){

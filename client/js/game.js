@@ -125,7 +125,12 @@ Game.createItems = function(){
 }
 
 Game.update = function () {
+    
+    if (this.player.alive){
 
+    console.log(' what is player ');
+    console.log(this.player);
+    
     moving = true;
     game.physics.arcade.collide(this.player, this.layer);
     game.physics.arcade.collide(this.player, items);
@@ -175,12 +180,15 @@ Game.update = function () {
             console.log(this.bombDelay);
         }, 2000);
     }
+
+    }
 }
 
 Game.addNewPlayer = function(id, x, y, color){ // add the main player to the game map
     var sprite = color + '-sprite';
     console.log(sprite);
     this.player = game.add.sprite(x, y, sprite);
+    this.player.id = id;
     Game.playerMap[id] = this.player;
     game.physics.enable(this.player);
     this.player.body.collideWorldBounds = true;
@@ -189,7 +197,7 @@ Game.addNewPlayer = function(id, x, y, color){ // add the main player to the gam
 };
 
 Game.addOtherPlayer = function(id, x, y, color){
-    var player = game.add.sprite(x, y, 'sprite');
+    var player = game.add.sprite(x, y, color + '-sprite');
     Game.playerMap[id] = player;
     game.physics.enable(player);
     player.body.setSize(10, 10, 3, 6);
@@ -197,12 +205,23 @@ Game.addOtherPlayer = function(id, x, y, color){
 
 
 Game.removePlayer = function(id){
+    console.log('remove player');
+    console.log('id is ' + id);
+    console.log(Game.playerMap);
+    console.log(Game.playerMap[id]);
     Game.playerMap[id].destroy();
     delete Game.playerMap[id];
 };
 
 Game.destroyPlayer = function(player, fire){
-    Client.destroyPlayer(player.id);
+    
+    if (player.alive){    
+        console.log('calling destroyPlayer function');
+        console.log(Game.playerMap[player.id]);
+        Client.destroyPlayer(player);
+        player.alive = false;
+    }
+    
 }
 
 Game.destroyItem = function(fire, item){

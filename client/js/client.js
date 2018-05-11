@@ -8,10 +8,11 @@ function init(){
 
 function setEventHandlers(){
     socket = Client.socket;
+    socket.isAlive = true;
 
     socket.on('newplayer', newPlayer);
     socket.on('allplayers', allPlayers);
-    socket.on('remove player', remove);
+    socket.on('remove player', onRemove);
     socket.on('start game', startGame);
     socket.on('move', move);
     socket.on('users', onUsers);
@@ -43,9 +44,9 @@ function onUsers(data){
     displayUsers(data);
 }
 
-function remove(id){
-    console.log('received a remove message for some reason');
-//    Game.removePlayer(id);
+function onRemove(data){
+//    console.log('received a remove message for some reason');
+    Game.removePlayer(data.id);
 }
 
 function move(data){
@@ -71,9 +72,15 @@ function onSubmitted(data){
     Game.myID = data.id;
 }
 
-Client.destroyPlayer = function(id){
-    Client.socket.emit('destroy player', {id: id});
-    console.log("SENT DESTROY PLAYER MESSAGE" + id);
+Client.destroyPlayer = function(player){
+    //console.log('test');
+    if(Client.socket.isAlive){
+        Client.socket.emit('destroy player', {id: player.id});
+        console.log('destroyed');
+        console.log(player);
+    }
+    Client.socket.isAlive = false;
+    //console.log("SENT DESTROY PLAYER MESSAGE" + player.id);
 }
 
 function onPlaceBomb(data){
