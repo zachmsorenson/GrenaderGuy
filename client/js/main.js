@@ -1,5 +1,5 @@
-var game = new Phaser.Game(24*32, 17*32, Phaser.AUTO, 'game');
-// width = 24 tiles * 32 pixel width per tile
+var game = new Phaser.Game(21*16, 21*16, Phaser.AUTO, 'game');
+// width = 24 tiles * 32 pixel width per tile //width and height are 21 tiles * 16 pixels each
 // height = 17 tiles * 32 pixel width per tile
 game.state.add('Game', Game);
 game.state.start('Game');
