@@ -198,7 +198,9 @@ Game.movePlayer = function(id, x, y){
 
 Game.placeBomb = function(x, y, id){
     var sprite = 'bomb';
-    var newBomb = this.bombs.create(x, y, 'bomb');
+    var normalizedX = x + 3 - ((x+3) % 16);
+    var normalizedY = y + 6 - ((y+6) % 16);
+    var newBomb = this.bombs.create(normalizedX, normalizedY, 'bomb');
     newBomb.id = id;
     console.log('created new bomb - id should be ' + id);
     //console.log(this.bombs.getChildAt(id));
