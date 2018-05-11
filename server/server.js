@@ -5,6 +5,7 @@ var io = require('socket.io').listen(server);
 
 var Game = require('./objects/game.js');
 var Player = require('./objects/player.js');
+var Bomb = require('./objects/bomb.js');
 //var Lobby = require('./objects/lobby.js');
 
 port = 8023;
@@ -27,7 +28,7 @@ function init() {
     setEventHandlers();
 
     // Game loop
-    setInterval(gameLoop, 50);
+    setInterval(gameLoop, 80);
 }
 
 function setEventHandlers() {
@@ -52,9 +53,7 @@ function onNewPlayer() {
 }
 
 function onMove(data){
-    console.log(data);
     var player = this.player;
-    console.log(player);
     this.player.x = data.x;
     this.player.y = data.y;
     this.player.hasMoved = true;
@@ -83,12 +82,13 @@ function startGame(){
         
             socket.player = {
                 id: socket.user.id,
+                color: socket.user.color,
                 x: xSpawn,
                 y: ySpawn,
                 alive: true,
                 hasMoved: false
             }
-            game.players.push(socket.player);
+            game.players[socket.player.id] = socket.player;
         }
     });
     io.sockets.emit('start game', getAllPlayers());
@@ -110,21 +110,7 @@ function submitPlayer(data){
     this.emit('submitted', user);
     io.sockets.emit('users', users);
 }
-
     
-/*
-function click(data){
-    if (this.player){
-        console.log('click to ' + data.x + ',' + data.y);
-        this.player.hasMoved = true;
-        this.player.x = data.x;
-        this.player.y = data.y;
-        //console.log(this.player);
-        //io.emit('move', this.player);
-    }
-}
-*/
-
 function onDisconnect(){
     console.log(io.sockets.connected.length);
     if (Object.keys(io.sockets.connected).length === 0){
@@ -134,16 +120,32 @@ function onDisconnect(){
         lastPlayerID = 0;
     }
     if (this.player){
-        io.emit('remove', this.player.id);
+        console.log('want to send a remove message');
+        //io.emit('remove', this.player.id);
     }
 }
 
 function onPlaceBomb(data){
-    if (this.player){
-        var player = this.player;
-        var bomb = new Bomb(player.x, player.y, lastBombID);
-        io.emit('place bomb', bomb);
-    }
+    var player = game.players[this.player.id];
+
+    var bombId = lastBombID++;
+
+    var bombTimeoutId = setTimeout(function() {
+        console.log("detonation");
+
+        io.emit('explode', game.bombs[bombId]);
+
+        delete game.bombs[bombId];
+
+
+    }, 2000);
+
+    var bomb = new Bomb(player.x, player.y, bombId);
+    console.log(bomb);
+    game.bombs[bombId] = bomb;
+    console.log(game.bombs);
+    
+    io.emit('place bomb', bomb);
 }
 
 function getAllPlayers(){
@@ -164,9 +166,9 @@ function randomInt (low, high) {
 function gameLoop() {
     for(var i in game.players) {
         var player = game.players[i]; // for each player
-        console.log(player);
+        //console.log(player);
         if(player.alive && player.hasMoved) {
-            console.log("player moved sent");
+            //console.log("player moved sent");
             io.emit('move', player);
             player.hasMoved = false;
         }

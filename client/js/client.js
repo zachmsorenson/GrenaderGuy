@@ -11,11 +11,13 @@ function setEventHandlers(){
 
     socket.on('newplayer', newPlayer);
     socket.on('allplayers', allPlayers);
-    socket.on('remove', remove);
+    socket.on('remove player', remove);
     socket.on('start game', startGame);
     socket.on('move', move);
     socket.on('users', onUsers);
     socket.on('submitted', onSubmitted);
+    socket.on('place bomb', onPlaceBomb);
+    socket.on('explode', onExplode);
 };
 Client.askNewPlayer = function(){
     Client.socket.emit('newplayer');
@@ -42,7 +44,8 @@ function onUsers(data){
 }
 
 function remove(id){
-    Game.removePlayer(id);
+    console.log('received a remove message for some reason');
+//    Game.removePlayer(id);
 }
 
 function move(data){
@@ -66,6 +69,18 @@ Client.submitPlayer = function(username, color){
 
 function onSubmitted(data){
     Game.myID = data.id;
+}
+
+function onPlaceBomb(data){
+    Game.placeBomb(data.x, data.y, data.id);    
+}
+
+Client.placeBomb = function(x, y){
+    Client.socket.emit('place bomb', {x:x, y:y});
+}
+
+function onExplode(data){
+    Game.explode(data);
 }
 
 ///////ADDED BY WILL FOR MOVEMENT///////////////

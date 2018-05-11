@@ -10,6 +10,12 @@ Game.preload = function(){
     game.load.spritesheet('tileset', 'assets/map/simples_pimples.png', 16, 16);
     game.load.image('sprite', 'assets/sprites/player-1.png');
     game.load.image('crater-1', 'assets/sprites/crater-1.png');
+    game.load.image('red-sprite', 'assets/sprites/player-1.png');
+    game.load.image('pink-sprite', 'assets/sprites/player-2.png');
+    game.load.image('yellow-sprite', 'assets/sprites/player-4.png');
+    game.load.image('blue-sprite', 'assets/sprites/player-5.png');
+    game.load.image('green-sprite', 'assets/sprites/player-9.png');
+    game.load.image('bomb', 'assets/sprites/bomb.png');
 };
 
 Game.create = function(){
@@ -21,10 +27,12 @@ Game.create = function(){
     //enable arcade phyics
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
-	upKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
-	downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
-	rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
-	leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+	this.upKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
+	this.downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+	this.rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+    this.leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+    this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    game.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);
 
     this.map = game.add.tilemap('map');
     //Game.map = map;
@@ -42,7 +50,7 @@ Game.create = function(){
     this.map.setCollision(254, true, this.layer);
     this.map.setCollision(4652, true);        
     
-    //create player temporary
+    //create player
     console.log(Game.startPlayers);
     var players = Game.startPlayers;
     console.log('my id: ' + Game.myID);
@@ -51,21 +59,30 @@ Game.create = function(){
         if (player.id == Game.myID){
             console.log('make my player');
             console.log(player);
-            Game.addNewPlayer(player.id, player.x, player.y); 
+            Game.addNewPlayer(player.id, player.x, player.y, player.color); 
         } else {
             console.log('make other player');
             console.log(player);
-            Game.addOtherPlayer(player.id, player.x, player.y);
+            Game.addOtherPlayer(player.id, player.x, player.y, player.color);
         }
     }
 
-    this.layer.inputEnabled = true; // Allows clicking on map
+    this.bombs = game.add.group();
+    this.items = {};
+    game.physics.enable(this.bombs, Phaser.Physics.ARCADE);
+    this.bombs.enableBody = true;
+    
 
-    this.layer.events.onInputUp.add(Game.getCoordinates, this);
+    //this.layer.inputEnabled = true; // Allows clicking on map
+
+    //this.layer.events.onInputUp.add(Game.getCoordinates, this);
 
     this.layer.resizeWorld();
 
     Game.createItems();
+
+    this.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
+    this.scale.setUserScale(1.5, 1.5, 0, 0);
 };
 
 Game.findObjectsByType = function(type, map, layer){
@@ -99,20 +116,20 @@ Game.update = function () {
     
     moving = true;
     game.physics.arcade.collide(this.player, this.layer);
-
-    if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT)){
+    //Moving Input
+    if (this.leftKey.isDown){
         this.player.body.velocity.x = -100;
         //Client.sendMove("LEFT");
     }
-    else if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)){
+    else if (this.rightKey.isDown){
         this.player.body.velocity.x = 100;
         //Client.sendMove("RIGHT");
     }
-    else if (game.input.keyboard.isDown(Phaser.Keyboard.UP)){
+    else if (this.upKey.isDown){
         this.player.body.velocity.y = -100;
         //Client.sendMove("UP");
     }
-    else if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN)){
+    else if (this.downKey.isDown){
         this.player.body.velocity.y = 100;
         //Client.sendMove("DOWN");
     } else {
@@ -122,15 +139,32 @@ Game.update = function () {
             this.player.body.velocity.y = 0;
        }
     }
-
     if (moving){
         Client.sendMove(Game.myID, this.player.x, this.player.y);
     }
 
+    //Bomb input
+    if (this.spaceKey.isDown){
+        console.log('space pressed');
+        console.log(this.bombDelay);
+    }
+    if (this.spaceKey.isDown && !this.bombDelay){
+        console.log('recorded bomb button');
+        Client.placeBomb(this.player.x, this.player.y);
+        this.bombDelay = true;
+        console.log("bombDelay: " + this.bombDelay);
+        setTimeout(() => {
+            console.log(' called bomb timeout ' );
+            this.bombDelay = false;
+            console.log(this.bombDelay);
+        }, 2000);
+    }
 }
 
-Game.addNewPlayer = function(id, x, y){ // add the main player to the game map
-    this.player = game.add.sprite(x, y, 'sprite');
+Game.addNewPlayer = function(id, x, y, color){ // add the main player to the game map
+    var sprite = color + '-sprite';
+    console.log(sprite);    
+    this.player = game.add.sprite(x, y, sprite);
     Game.playerMap[id] = this.player;
     game.physics.enable(this.player);
     this.player.body.collideWorldBounds = true;
@@ -138,15 +172,12 @@ Game.addNewPlayer = function(id, x, y){ // add the main player to the game map
     this.player.body.setSize(10, 10, 3, 6);
 };
 
-Game.addOtherPlayer = function(id, x, y){
+Game.addOtherPlayer = function(id, x, y, color){
     var player = game.add.sprite(x, y, 'sprite');
     Game.playerMap[id] = player;
     game.physics.enable(player);
     player.body.setSize(10, 10, 3, 6);
 };
-
-Game.addOtherPlayer
-
 
 
 Game.removePlayer = function(id){
@@ -154,19 +185,37 @@ Game.removePlayer = function(id){
     delete Game.playerMap[id];
 };
 
-Game.getCoordinates = function(layer, pointer){
-    console.log("Got an input from client");
-    Client.sendClick(pointer.worldX, pointer.worldY);
-};
-
 Game.movePlayer = function(id, x, y){
     var player = Game.playerMap[id];
-    player.x = x;
-    player.y = y;
-//    var distance = Phaser.Math.distance(player.x, player.y, x, y);
-//    var duration = distance*10;
-//    var tween = game.add.tween(player);
-//    tween.to({x:x, y:y}, duration);
-//    tween.start();
+//    player.x = x;
+//    player.y = y;
+    var distance = Phaser.Math.distance(player.x, player.y, x, y);
+    var duration = distance*8.6;
+    var tween = game.add.tween(player);
+    tween.to({x:x, y:y}, duration);
+    tween.start();
 };
 
+Game.placeBomb = function(x, y, id){
+    var sprite = 'bomb';
+    var newBomb = this.bombs.create(x, y, 'bomb');
+    newBomb.id = id;
+    console.log('created new bomb - id should be ' + id);
+    //console.log(this.bombs.getChildAt(id));
+    //this.bombs[id] = game.add.sprite(x, y, sprite);
+    //this.bombs.add(new Bomb(x, y, id));
+};
+
+Game.explode = function(bomb){
+    console.log('explode function');
+    console.log(bomb);
+    console.log(this.bombs);
+    this.bombs.forEach((bombChild)=> {
+        if (bombChild.id == bomb.id && bombChild){
+            this.bombs.remove(bombChild);
+        }
+    });
+    //var childBomb = this.bombs.getChildAt(bomb.id);
+    //this.bombs.remove(childBomb);
+    console.log(this.bombs);
+}
