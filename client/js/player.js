@@ -19,32 +19,40 @@ var Player = function (x, y, id) {
 
 	Player.prototype.handleMovementInput = function () {
 
+        var isMoving = true;
+    
+        
 		if (game.input.keyboard.isDown(Phaser.keyboard.UP)) {
-			//temporary:
+			this.body.velocity.x = 0;
+            this.body.velocity.y = -this.speed;
 			console.log("Pressed: UP");
 		}
 		else if (game.input.keyboard.isDown(Phaser.keyboard.DOWN)) {
-			//temporary:
-			console.log("Pressed: DOWN");
+			this.body.velocity.x = 0;
+			this.body.velocity.y = this.speed;
 		}
 		else if (game.input.keyboard.isDown(Phaser.keyboard.RIGHT)) {
-			//temporary:
-			console.log("Pressed: RIGHT");
+            this.body.velocity.y = 0;
+            this.body.velocity.x = this.speed;
+            console.log("Pressed: RIGHT");
 		}
 		else if (game.input.keyboard.isDown(Phaser.keyboard.LEFT)) {
-			//temporary:
-			console.log("Pressed: LEFT");
+			this.body.velocity.y = 0;
+            this.body.velocity.x = -this.speed;
+            console.log("Pressed: LEFT");
 		}
 		else {
+            isMoving = false;
+            this.body.velocity.x = 0;
+            this.body.velocity.y = 0;
 		}
 
 	}
 
-	Player.prototype.handlBombInput = function () {
+	Player.prototype.handleBombInput = function () {
 		if (game.input.keyboard.isDown(Phaser.keyboard.SPACEBAR)) {
 			console.log("Pressed: SPACEBAR");
 		}
 	}
 }
 
-module.exports = Player;
