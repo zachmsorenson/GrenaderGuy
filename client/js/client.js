@@ -15,23 +15,23 @@ function setEventHandlers(){
     socket.on('start game', startGame);
     socket.on('move', move);
     socket.on('users', onUsers);
+    socket.on('submitted', onSubmitted);
 };
 Client.askNewPlayer = function(){
     Client.socket.emit('newplayer');
 };
 
-Client.sendMove = function(direction){
-    console.log("move" + direction);
-    Client.socket.emit('move', direction);
+Client.sendMove = function(id, x, y){
+    Client.socket.emit('move', {id:id, x:x, y:y});
 }
 
 function newPlayer(data){
-    Game.addNewPlayer(data.id, data.x, data.y);
+//    Game.addNewPlayer(data.id, data.x, data.y);
 }
 
 function allPlayers(data){
     for (var i = 0; i < data.length; i++){
-        Game.addNewPlayer(data[i].id, data[i].x, data[i].y);
+//        Game.addNewPlayer(data[i].id, data[i].x, data[i].y);
     }
 }
 
@@ -46,7 +46,9 @@ function remove(id){
 }
 
 function move(data){
-    Game.movePlayer(data.id, data.x, data.y);
+    if (data.id != Game.myID){
+        Game.movePlayer(data.id, data.x, data.y);
+    }
 }
 
 //Mouse-click movement
@@ -60,6 +62,10 @@ function sendStartGame(){
 
 Client.submitPlayer = function(username, color){
     Client.socket.emit('submit player', {username: username, color: color});
+}
+
+function onSubmitted(data){
+    Game.myID = data.id;
 }
 
 ///////ADDED BY WILL FOR MOVEMENT///////////////

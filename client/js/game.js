@@ -26,26 +26,44 @@ Game.create = function(){
 	rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 	leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
 
-    var map = game.add.tilemap('map');
-    Game.map = map;
+    this.map = game.add.tilemap('map');
+    //Game.map = map;
     // add the tileset ontop of the tilemap
-    map.addTilesetImage('opensTileset', 'tileset');
-    map.addTilesetImage('crater', 'crater-1');
+    this.map.addTilesetImage('opensTileset', 'tileset');
+    this.map.addTilesetImage('crater', 'crater-1');
 
     // set up layers for tilemap
-    var backgroundLayer = map.createLayer('backgroundLayer');
-    var blockedLayer = map.createLayer('blockedLayer');
-    var objectLayer = map.createLayer('objectLayer');
+    this.layer = this.map.createLayer('backgroundLayer');
+    this.layer = this.map.createLayer('blockedLayer');
+    var objectLayer = this.map.createLayer('objectLayer');
     console.log(objectLayer);
 
-    map.setCollisionBetween(1, 5000, true, blockedLayer);
-    map.setCollisionBetween(1, 5000, true, objectLayer);
+    this.map.setCollision(204, true, this.layer);
+    this.map.setCollision(254, true, this.layer);
+    this.map.setCollision(4652, true);        
     
-    backgroundLayer.inputEnabled = true; // Allows clicking on map
+    //create player temporary
+    console.log(Game.startPlayers);
+    var players = Game.startPlayers;
+    console.log('my id: ' + Game.myID);
+    for (var i = 0; i < Game.startPlayers.length; i++){
+        var player = players[i];
+        if (player.id == Game.myID){
+            console.log('make my player');
+            console.log(player);
+            Game.addNewPlayer(player.id, player.x, player.y); 
+        } else {
+            console.log('make other player');
+            console.log(player);
+            Game.addOtherPlayer(player.id, player.x, player.y);
+        }
+    }
 
-    backgroundLayer.events.onInputUp.add(Game.getCoordinates, this);
+    this.layer.inputEnabled = true; // Allows clicking on map
 
-    backgroundLayer.resizeWorld();
+    this.layer.events.onInputUp.add(Game.getCoordinates, this);
+
+    this.layer.resizeWorld();
 
     Game.createItems();
 };
@@ -78,34 +96,56 @@ Game.createItems = function(){
 }
 
 Game.update = function () {
-    //var player = this.playerMap[0];
+    
+    moving = true;
+    game.physics.arcade.collide(this.player, this.layer);
+
     if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT)){
-        Client.sendMove("LEFT");
+        this.player.body.velocity.x = -100;
+        //Client.sendMove("LEFT");
     }
-    if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)){
-        Client.sendMove("RIGHT");
+    else if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)){
+        this.player.body.velocity.x = 100;
+        //Client.sendMove("RIGHT");
     }
-    if (game.input.keyboard.isDown(Phaser.Keyboard.UP)){
-        Client.sendMove("UP");
+    else if (game.input.keyboard.isDown(Phaser.Keyboard.UP)){
+        this.player.body.velocity.y = -100;
+        //Client.sendMove("UP");
     }
-    if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN)){
-        Client.sendMove("DOWN");
+    else if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN)){
+        this.player.body.velocity.y = 100;
+        //Client.sendMove("DOWN");
+    } else {
+       moving = false;
+       if (this.player){
+            this.player.body.velocity.x = 0;
+            this.player.body.velocity.y = 0;
+       }
+    }
+
+    if (moving){
+        Client.sendMove(Game.myID, this.player.x, this.player.y);
     }
 
 }
 
-Game.addNewPlayer = function(id, x, y){ // add a new player to the game map
-     // the player in the player map id with
-    var sprite = game.add.sprite(x, y, 'sprite');
-    game.physics.arcade.enable(sprite);
-    console.log(Game);
-    Game.playerMap[id] = game.add.sprite(x, y, 'sprite'); 
-    game.physics.arcade.enable(Game.playerMap[id]);
-
-    //create new player
-   // Game.playerMap[id] = game.add.sprite(x, y, 'sprite'); // the player in the player map id with
-    // passed id is added to the game with a sprite
+Game.addNewPlayer = function(id, x, y){ // add the main player to the game map
+    this.player = game.add.sprite(x, y, 'sprite');
+    Game.playerMap[id] = this.player;
+    game.physics.enable(this.player);
+    this.player.body.collideWorldBounds = true;
+    console.log(this.player.body);
+    this.player.body.setSize(10, 10, 3, 6);
 };
+
+Game.addOtherPlayer = function(id, x, y){
+    var player = game.add.sprite(x, y, 'sprite');
+    Game.playerMap[id] = player;
+    game.physics.enable(player);
+    player.body.setSize(10, 10, 3, 6);
+};
+
+Game.addOtherPlayer
 
 
 
@@ -121,10 +161,12 @@ Game.getCoordinates = function(layer, pointer){
 
 Game.movePlayer = function(id, x, y){
     var player = Game.playerMap[id];
-    var distance = Phaser.Math.distance(player.x, player.y, x, y);
-    var duration = distance*10;
-    var tween = game.add.tween(player);
-    tween.to({x:x, y:y}, duration);
-    tween.start();
+    player.x = x;
+    player.y = y;
+//    var distance = Phaser.Math.distance(player.x, player.y, x, y);
+//    var duration = distance*10;
+//    var tween = game.add.tween(player);
+//    tween.to({x:x, y:y}, duration);
+//    tween.start();
 };
 

@@ -27,7 +27,7 @@ function init() {
     setEventHandlers();
 
     // Game loop
-    setInterval(gameLoop, 100);
+    setInterval(gameLoop, 50);
 }
 
 function setEventHandlers() {
@@ -52,19 +52,11 @@ function onNewPlayer() {
 }
 
 function onMove(data){
-    var direction = data;
     console.log(data);
     var player = this.player;
     console.log(player);
-    if (direction === "UP"){
-        this.player.y = this.player.y - 16;
-    } else if (direction === "DOWN"){
-        this.player.y = this.player.y + 16;
-    } else if (direction === "LEFT"){
-        this.player.x = this.player.x - 16;
-    } else if (direction === "RIGHT"){
-        this.player.x = this.player.x + 16;
-    }
+    this.player.x = data.x;
+    this.player.y = data.y;
     this.player.hasMoved = true;
 }
 
@@ -99,7 +91,7 @@ function startGame(){
             game.players.push(socket.player);
         }
     });
-    io.sockets.emit('start game');
+    io.sockets.emit('start game', getAllPlayers());
     setTimeout(function(){
         io.sockets.emit('allplayers', getAllPlayers());
     }, 500);
@@ -115,7 +107,7 @@ function submitPlayer(data){
     }
 
     this.user = user;
-
+    this.emit('submitted', user);
     io.sockets.emit('users', users);
 }
 

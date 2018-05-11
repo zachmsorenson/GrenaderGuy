@@ -3,6 +3,7 @@ var game = new Phaser.Game(21*16, 21*16, Phaser.AUTO, 'game');
 // height = 17 tiles * 32 pixel width per tile
 game.state.add('Game', Game);
 
-function startGame(){
+function startGame(players){
+    Game.startPlayers = players;
     game.state.start('Game');
 }
