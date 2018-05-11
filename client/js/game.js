@@ -16,6 +16,10 @@ Game.preload = function(){
     game.load.image('blue-sprite', 'assets/sprites/player-5.png');
     game.load.image('green-sprite', 'assets/sprites/player-9.png');
     game.load.image('bomb', 'assets/sprites/bomb.png');
+    game.load.image('bfire-right', 'assets/sprites/bfire-right.png');
+    game.load.image('bfire-left', 'assets/sprites/bfire-left.png');
+    game.load.image('bfire-up', 'assets/sprites/bfire-up.png');
+    game.load.image('bfire-down', 'assets/sprites/bfire-down.png');
 };
 
 Game.create = function(){
@@ -27,9 +31,9 @@ Game.create = function(){
     //enable arcade phyics
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
-	this.upKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
-	this.downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
-	this.rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+    this.upKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
+    this.downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+    this.rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
     this.leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
     this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     game.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);
@@ -48,8 +52,8 @@ Game.create = function(){
 
     this.map.setCollision(204, true, this.layer);
     this.map.setCollision(254, true, this.layer);
-    this.map.setCollision(4652, true);        
-    
+    this.map.setCollision(4652, true, this.layer);
+
     //create player
     console.log(Game.startPlayers);
     var players = Game.startPlayers;
@@ -69,9 +73,10 @@ Game.create = function(){
 
     this.bombs = game.add.group();
     this.items = {};
+    //this.craters = game.add.group();
     game.physics.enable(this.bombs, Phaser.Physics.ARCADE);
     this.bombs.enableBody = true;
-    
+
 
     //this.layer.inputEnabled = true; // Allows clicking on map
 
@@ -80,7 +85,7 @@ Game.create = function(){
     this.layer.resizeWorld();
 
     Game.createItems();
-
+    //game.physics.enable(this.craters, Phaser.Physics.ARCADE);
     this.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
     this.scale.setUserScale(1.5, 1.5, 0, 0);
 };
@@ -98,7 +103,8 @@ Game.findObjectsByType = function(type, map, layer){
 }
 
 Game.createFromTiledObject = function(element, group){
-	var sprite = group.create(element.x, element.y, 'crater-1');
+	//var sprite = group.create(element.x, element.y, 'crater-1');
+	var craters = group.create(element.x, element.y, 'crater-1');
 }
 
 Game.createItems = function(){
@@ -113,9 +119,10 @@ Game.createItems = function(){
 }
 
 Game.update = function () {
-    
+
     moving = true;
     game.physics.arcade.collide(this.player, this.layer);
+    game.physics.arcade.collide(this.player, items);
     //Moving Input
     if (this.leftKey.isDown){
         this.player.body.velocity.x = -100;
@@ -163,7 +170,7 @@ Game.update = function () {
 
 Game.addNewPlayer = function(id, x, y, color){ // add the main player to the game map
     var sprite = color + '-sprite';
-    console.log(sprite);    
+    console.log(sprite);
     this.player = game.add.sprite(x, y, sprite);
     Game.playerMap[id] = this.player;
     game.physics.enable(this.player);
