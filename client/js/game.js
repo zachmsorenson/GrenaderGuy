@@ -16,8 +16,8 @@ Game.preload = function(){
     game.load.image('blue-sprite', 'assets/sprites/player-5.png');
     game.load.image('green-sprite', 'assets/sprites/player-9.png');
     game.load.image('bomb', 'assets/sprites/bomb.png');
-    game.load.image('bfire-right', 'assets/sprites/bfire-right.png');
-    game.load.image('bfire-left', 'assets/sprites/bfire-left.png');
+    game.load.image('bfire-left', 'assets/sprites/bfire-right.png');
+    game.load.image('bfire-right', 'assets/sprites/bfire-left.png');
     game.load.image('bfire-up', 'assets/sprites/bfire-up.png');
     game.load.image('bfire-down', 'assets/sprites/bfire-down.png');
 };
@@ -77,6 +77,9 @@ Game.create = function(){
     game.physics.enable(this.bombs, Phaser.Physics.ARCADE);
     this.bombs.enableBody = true;
 
+    this.fire = game.add.group();
+    game.physics.enable(this.fire, Phaser.Physics.ARCADE);
+    this.fire.enableBody = true;
 
     //this.layer.inputEnabled = true; // Allows clicking on map
 
@@ -123,6 +126,7 @@ Game.update = function () {
     moving = true;
     game.physics.arcade.collide(this.player, this.layer);
     game.physics.arcade.collide(this.player, items);
+    game.physics.arcade.collide(this.player, Game.bombs);
     //Moving Input
     if (this.leftKey.isDown){
         this.player.body.velocity.x = -100;
@@ -220,7 +224,16 @@ Game.explode = function(bomb){
     console.log(this.bombs);
     this.bombs.forEach((bombChild)=> {
         if (bombChild.id == bomb.id && bombChild){
-            console.log(bombChild);
+            var bombx = bombChild.world.x;
+            var bomby = bombChild.world.y;
+            var newFire = this.fire.create(bombx+16, bomby, 'bfire-right');
+            //newFire.id = id;
+            var newFire = this.fire.create(bombx-16, bomby, 'bfire-left');
+                //newFire.id = id;
+            var newFire = this.fire.create(bombx, bomby+16, 'bfire-up');
+            //newFire.id = id;
+            var newFire = this.fire.create(bombx, bomby-16, 'bfire-down');
+
             this.bombs.remove(bombChild);
         }
     });
