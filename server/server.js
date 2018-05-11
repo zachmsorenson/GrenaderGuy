@@ -7,7 +7,7 @@ var Game = require('./objects/game.js');
 var Player = require('./objects/player.js');
 //var Lobby = require('./objects/lobby.js');
 
-port = 8019;
+port = 8023;
 app.use(express.static('client'));
 
 server.listen(port, function(){
@@ -23,7 +23,7 @@ init();
 function init() {
     // Listen for events
     setEventHandlers();
-    
+
     // Game loop
     setInterval(gameLoop, 200);
 };
@@ -37,7 +37,7 @@ function setEventHandlers() {
         client.on('disconnect', onDisconnect);
 
   //      client.on('join room', Lobby.onJoinRoom);
-        client.on('join room', Lobby.onJoinRoom);
+  //      client.on('join room', Lobby.onJoinRoom);
         client.on('right', moveRight);
         client.on('left', moveLeft);
         client.on('down', moveDown);
@@ -67,6 +67,8 @@ function onNewPlayer(){
     console.log(game.players);
     this.emit('allplayers', getAllPlayers());
     this.broadcast.emit('newplayer', this.player);
+}
+
 function moveRight (data) {
     this.player.x = data.x + 20;
     io.emit('move_direction', this.player);
@@ -142,4 +144,4 @@ function gameLoop() {
             }
         }
 //    }
-}    
+}
