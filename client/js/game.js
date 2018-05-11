@@ -262,12 +262,17 @@ Game.explode = function(bomb){
 	    var bombx = bombChild.world.x;
 	    var bomby = bombChild.world.y;
 	    var rightFire = this.fire.create(bombx+16, bomby, 'bfire-right');
-            //newFire.id = id;
 	    var leftFire = this.fire.create(bombx-16, bomby, 'bfire-left');
-            //newFire.id = id;
 	    var upFire = this.fire.create(bombx, bomby+16, 'bfire-up');
-            //newFire.id = id;
 	    var downFire = this.fire.create(bombx, bomby-16, 'bfire-down');
+	    var rightFire2 = this.fire.create(bombx+32, bomby, 'bfire-right');
+	    var leftFire2 = this.fire.create(bombx-32, bomby, 'bfire-left');
+	    var upFire2 = this.fire.create(bombx, bomby+32, 'bfire-up');
+	    var downFire2 = this.fire.create(bombx, bomby-32, 'bfire-down');
+	    var rightFire3 = this.fire.create(bombx+48, bomby, 'bfire-right');
+	    var leftFire3 = this.fire.create(bombx-48, bomby, 'bfire-left');
+	    var upFire3 = this.fire.create(bombx, bomby+48, 'bfire-up');
+	    var downFire3 = this.fire.create(bombx, bomby-48, 'bfire-down');
 
             this.bombs.remove(bombChild);
 	    setTimeout(() => {
@@ -275,6 +280,14 @@ Game.explode = function(bomb){
 		this.fire.remove(leftFire);
 		this.fire.remove(upFire);
 		this.fire.remove(downFire);
+		this.fire.remove(rightFire2);
+		this.fire.remove(leftFire2);
+		this.fire.remove(upFire2);
+		this.fire.remove(downFire2);
+		this.fire.remove(rightFire3);
+		this.fire.remove(leftFire3);
+		this.fire.remove(upFire3);
+		this.fire.remove(downFire3);
 	    }, 1000);
         }
     });
