@@ -85,6 +85,12 @@ Game.update = function () {
     if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)){
         Client.sendMove("RIGHT");
     }
+    if (game.input.keyboard.isDown(Phaser.Keyboard.UP)){
+        Client.sendMove("UP");
+    }
+    if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN)){
+        Client.sendMove("DOWN");
+    }
 
 }
 

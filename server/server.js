@@ -27,7 +27,7 @@ function init() {
     setEventHandlers();
 
     // Game loop
-    setInterval(gameLoop, 200);
+    setInterval(gameLoop, 100);
 }
 
 function setEventHandlers() {
@@ -35,7 +35,7 @@ function setEventHandlers() {
         console.log('Player connection: ' + client.id);
 
         client.on('newplayer', onNewPlayer);
-        client.on('click', click);
+//        client.on('click', click);
         client.on('disconnect', onDisconnect);
         client.on('start game', startGame);
         client.on('place bomb', onPlaceBomb);
@@ -68,29 +68,6 @@ function onMove(data){
     this.player.hasMoved = true;
 }
 
-/*
-function onNewPlayer(){
-    this.player = {
-        id: lastPlayerID++,
-        x: randomInt(100,400),
-        y: randomInt(100,400),
-        alive: true,
-        hasMoved: false
-    }
-    game.players[this.player.id] = this.player;
-    console.log(game);
-    console.log(game.players);
-    this.emit('allplayers', getAllPlayers());
-    this.broadcast.emit('newplayer', this.player);
-}
-*/
-
-function moveRight (data) {
-    this.player.x = data.x + 20;
-    io.emit('move_direction', this.player);
-
-}
-
 function startGame(){
     console.log('recieved start game message');
 
@@ -119,6 +96,7 @@ function startGame(){
                 alive: true,
                 hasMoved: false
             }
+            game.players.push(socket.player);
         }
     });
     io.sockets.emit('start game');
@@ -142,7 +120,7 @@ function submitPlayer(data){
 }
 
     
-
+/*
 function click(data){
     if (this.player){
         console.log('click to ' + data.x + ',' + data.y);
@@ -153,6 +131,7 @@ function click(data){
         //io.emit('move', this.player);
     }
 }
+*/
 
 function onDisconnect(){
     console.log(io.sockets.connected.length);
@@ -173,10 +152,6 @@ function onPlaceBomb(data){
         var bomb = new Bomb(player.x, player.y, lastBombID);
         io.emit('place bomb', bomb);
     }
-}
-
-function onMovePlayer(data) {
-    var player = this.player;
 }
 
 function getAllPlayers(){
